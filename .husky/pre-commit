@@ -1,0 +1,3 @@
+yarn check-format
+yarn lint
+yarn build
