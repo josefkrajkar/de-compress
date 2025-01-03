@@ -1,7 +1,8 @@
 export type LZ77Token = {
-  offset: number;
-  length: number;
-  nextChar: string | null;
+  type: 'match' | 'literal';
+  data: number | string;
+  length?: number;
+  offset?: number;
 };
 
 export type HuffmanNode = {
@@ -9,10 +10,11 @@ export type HuffmanNode = {
   freq: number;
   left: HuffmanNode | null;
   right: HuffmanNode | null;
+  code?: string;
 };
 
-export type HuffmanResult = {
-  encodedText: string;
-  codes: Record<string, string>;
-  huffmanTree: HuffmanNode;
+export type CompressedData = {
+  huffmanTree: number[];
+  compressedContent: Uint8Array;
+  originalSize: number;
 };

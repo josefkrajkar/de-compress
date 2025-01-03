@@ -5,13 +5,14 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 
 // Utils
-import { compressWithLZ77AndHuffman } from './utils/compressFunctions';
+import { compressWithDynamicTables } from './utils/compressFunctions';
 
 // Styles
 import './App.css';
 
 function App() {
   const [file, setFile] = useState<File | null>(null);
+  const [stats, setStats] = useState<{ original: number; compressed: number } | null>(null);
 
   function processFile() {
     if (!file) return;
@@ -22,16 +23,39 @@ function App() {
       if (typeof text !== 'string') return;
 
       // Compress
-      const compressed = compressWithLZ77AndHuffman(text);
-      const compressedString = JSON.stringify(compressed);
+      const compressed = compressWithDynamicTables(text);
 
-      // Create downloadable blob
-      const blob = new Blob([compressedString], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
+      // Calculate compressed size (tree + content)
+      const treeSize = compressed.huffmanTree.length;
+      const contentSize = compressed.compressedContent.length;
+      const totalCompressedSize = treeSize + contentSize;
+
+      // Update stats
+      setStats({
+        original: compressed.originalSize,
+        compressed: totalCompressedSize,
+      });
+
+      // Create binary blob with header
+      const header = new Uint8Array(8);
+      // Store tree size in first 4 bytes
+      new DataView(header.buffer).setUint32(0, treeSize, true);
+      // Store original size in next 4 bytes
+      new DataView(header.buffer).setUint32(4, compressed.originalSize, true);
+
+      // Combine all parts
+      const treeArray = new Uint8Array(compressed.huffmanTree);
+      const contentArray = compressed.compressedContent;
+
+      const finalBlob = new Blob([header, treeArray, contentArray], {
+        type: 'application/octet-stream',
+      });
+      const url = URL.createObjectURL(finalBlob);
 
       // Download
       const link = document.getElementById('download-link') as HTMLAnchorElement;
       link.href = url;
+      link.download = file.name + '.compressed';
       link.click();
     };
 
@@ -52,17 +76,25 @@ function App() {
           <input
             className="hidden"
             type="file"
-            onChange={e => setFile(e.target.files?.[0] || null)}
+            onChange={e => {
+              setFile(e.target.files?.[0] || null);
+              setStats(null);
+            }}
           />
           <button onClick={() => document.querySelector('input')?.click()}>Upload</button>
           <button onClick={processFile} disabled={!file} className={!file ? 'disabled' : ''}>
             Process and download
           </button>
-          {file && (
-            <a id="download-link" className="hidden" href={''} download={'compressed.json'}>
-              Download
-            </a>
+          {stats && (
+            <div className="stats">
+              <p>Original size: {stats.original} bytes</p>
+              <p>Compressed size: {stats.compressed} bytes</p>
+              <p>Compression ratio: {((stats.compressed / stats.original) * 100).toFixed(1)}%</p>
+            </div>
           )}
+          <a id="download-link" className="hidden" href={''} download={'compressed'}>
+            Download
+          </a>
         </div>
       </main>
 
