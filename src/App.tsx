@@ -5,7 +5,7 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 
 // Utils
-import { compress } from './utils/compressFunctions';
+import { compressWithLZ77AndHuffman } from './utils/compressFunctions';
 
 // Styles
 import './App.css';
@@ -22,7 +22,7 @@ function App() {
       if (typeof text !== 'string') return;
 
       // Compress
-      const compressed = compress(text);
+      const compressed = compressWithLZ77AndHuffman(text);
       const compressedString = JSON.stringify(compressed);
 
       // Create downloadable blob

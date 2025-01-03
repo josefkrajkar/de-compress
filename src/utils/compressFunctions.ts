@@ -33,10 +33,23 @@ function lz77Compress(input: string, windowSize = 20): LZ77Token[] {
   return result;
 }
 
-function huffmanEncode(input: string): HuffmanResult {
+function encodeLZ77Tokens(tokens: LZ77Token[]): string {
+  return tokens
+    .map(token => {
+      const offsetBinary = token.offset.toString(2).padStart(8, '0');
+      const lengthBinary = token.length.toString(2).padStart(8, '0');
+      const nextCharBinary = token.nextChar
+        ? token.nextChar.charCodeAt(0).toString(2).padStart(8, '0')
+        : '00000000';
+      return offsetBinary + lengthBinary + nextCharBinary;
+    })
+    .join('');
+}
+
+function huffmanEncodeBinary(input: string): HuffmanResult {
   const frequency: Record<string, number> = {};
-  for (const char of input) {
-    frequency[char] = (frequency[char] || 0) + 1;
+  for (const bit of input) {
+    frequency[bit] = (frequency[bit] || 0) + 1;
   }
 
   const nodes: HuffmanNode[] = Object.entries(frequency).map(([char, freq]) => ({
@@ -80,21 +93,13 @@ function huffmanEncode(input: string): HuffmanResult {
   return { encodedText, codes, huffmanTree };
 }
 
-export function compress(input: string): { lz77: LZ77Token[]; huffman: HuffmanResult } {
-  // Step 1: Apply LZ77
+export function compressWithLZ77AndHuffman(input: string) {
   const lz77Tokens = lz77Compress(input);
+  const binaryData = encodeLZ77Tokens(lz77Tokens);
+  const huffmanResult = huffmanEncodeBinary(binaryData);
 
-  // Convert LZ77 tokens back to a string representation
-  const lz77String = lz77Tokens
-    .map(token =>
-      token.offset === 0 && token.length === 0
-        ? token.nextChar
-        : `[${token.offset},${token.length},${token.nextChar || ''}]`
-    )
-    .join('');
-
-  // Step 2: Apply Huffman Encoding on LZ77 output
-  const huffmanResult = huffmanEncode(lz77String);
-
-  return { lz77: lz77Tokens, huffman: huffmanResult };
+  return {
+    lz77Tokens,
+    huffmanResult,
+  };
 }
