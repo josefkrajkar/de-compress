@@ -184,3 +184,92 @@ export function compressWithDynamicTables(input: string): CompressedData {
     originalSize: input.length,
   };
 }
+
+function deserializeHuffmanTree(serializedTree: number[]): HuffmanNode {
+  let index = 0;
+
+  function traverse(): HuffmanNode {
+    if (serializedTree[index] === 1) {
+      index++;
+      const char = String.fromCharCode(serializedTree[index]);
+      index++;
+      return { char, freq: 0, left: null, right: null };
+    } else {
+      index++;
+      const left = traverse();
+      const right = traverse();
+      return { char: null, freq: 0, left, right };
+    }
+  }
+
+  return traverse();
+}
+
+function decodeBits(compressedContent: Uint8Array, huffmanTree: HuffmanNode): LZ77Token[] {
+  const tokens: LZ77Token[] = [];
+  let bitIndex = 0;
+  let byteIndex = 0;
+
+  function readBits(n: number): number {
+    let result = 0;
+    for (let i = 0; i < n; i++) {
+      if (byteIndex >= compressedContent.length) break;
+      result = (result << 1) | ((compressedContent[byteIndex] >> (7 - bitIndex)) & 1);
+      bitIndex++;
+      if (bitIndex === 8) {
+        bitIndex = 0;
+        byteIndex++;
+      }
+    }
+    return result;
+  }
+
+  function decodeHuffmanCode(): string {
+    let node = huffmanTree;
+    while (node.char === null) {
+      const bit = readBits(1);
+      node = bit ? node.right! : node.left!;
+    }
+    return node.char;
+  }
+
+  while (byteIndex < compressedContent.length) {
+    const flag = readBits(1);
+    if (flag === 0) {
+      const char = decodeHuffmanCode();
+      tokens.push({ type: 'literal', data: char.charCodeAt(0) });
+    } else {
+      const length = readBits(8);
+      const offset = readBits(12);
+      const nextChar = decodeHuffmanCode();
+      tokens.push({
+        type: 'match',
+        length,
+        offset,
+        data: nextChar.charCodeAt(0),
+      });
+    }
+  }
+
+  return tokens;
+}
+
+export function decompressWithDynamicTables(compressedData: CompressedData): string {
+  const huffmanTree = deserializeHuffmanTree(compressedData.huffmanTree);
+  const tokens = decodeBits(compressedData.compressedContent, huffmanTree);
+
+  let result = '';
+  for (const token of tokens) {
+    if (token.type === 'literal') {
+      result += String.fromCharCode(token.data as number);
+    } else {
+      const start = result.length - token.offset!;
+      for (let i = 0; i < token.length!; i++) {
+        result += result[start + i];
+      }
+      result += String.fromCharCode(token.data as number);
+    }
+  }
+
+  return result;
+}

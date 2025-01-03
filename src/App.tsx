@@ -5,7 +5,7 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 
 // Utils
-import { compressWithDynamicTables } from './utils/compressFunctions';
+import { compressWithDynamicTables, decompressWithDynamicTables } from './utils/compressFunctions';
 
 // Styles
 import './App.css';
@@ -18,6 +18,40 @@ function App() {
     if (!file) return;
 
     const reader = new FileReader();
+
+    if (file?.name.endsWith('.compressed')) {
+      // File is already compressed, decompress it
+      reader.onload = () => {
+        const arrayBuffer = reader.result as ArrayBuffer;
+        const dataView = new DataView(arrayBuffer);
+
+        // Extract header information
+        const treeSize = dataView.getUint32(0, true);
+        const originalSize = dataView.getUint32(4, true);
+
+        // Extract Huffman tree and compressed content
+        const treeArray = new Uint8Array(arrayBuffer.slice(8, 8 + treeSize));
+        const contentArray = new Uint8Array(arrayBuffer.slice(8 + treeSize));
+
+        // Decompress
+        const decompressed = decompressWithDynamicTables({
+          huffmanTree: Array.from(treeArray),
+          compressedContent: contentArray,
+          originalSize: originalSize,
+        });
+
+        // Create blob and download
+        const decompressedBlob = new Blob([decompressed], { type: 'text/plain' });
+        const url = URL.createObjectURL(decompressedBlob);
+        const link = document.getElementById('download-link') as HTMLAnchorElement;
+        link.href = url;
+        link.download = file.name.replace('.compressed', '');
+        link.click();
+      };
+      reader.readAsArrayBuffer(file);
+      return;
+    }
+
     reader.onload = () => {
       const text = reader.result;
       if (typeof text !== 'string') return;
