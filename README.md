@@ -1,50 +1,108 @@
-# React + TypeScript + Vite
+# Compress
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern web application for text file compression using the LZ77 algorithm. Built with React, TypeScript, and Vite.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Simple and intuitive user interface
+- Text file compression using LZ77 algorithm
+- Instant file download of compressed results
+- Modern React hooks and TypeScript implementation
+- Responsive design that works on all devices
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- React 18
+- TypeScript
+- Vite
+- CSS Modules
+- Husky (pre-commit hooks)
+- Prettier (code formatting)
+- ESLint (code linting)
 
-- Configure the top-level `parserOptions` property like this:
+## Getting Started
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
+### Prerequisites
+
+- Node.js (v16 or higher)
+- yarn or npm
+
+### Installation
+
+1. Clone the repository
+
+```bash
+git clone [your-repo-url]
+cd compress
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+2. Install dependencies
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react';
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-});
+```bash
+yarn install
+# or
+npm install
 ```
+
+3. Start the development server
+
+```bash
+yarn dev
+# or
+npm run dev
+```
+
+The application will be available at `http://localhost:5173`
+
+## Development
+
+### Available Scripts
+
+- `yarn dev` - Start development server
+- `yarn build` - Build for production
+- `yarn preview` - Preview production build
+- `yarn lint` - Run ESLint
+- `yarn format` - Format code with Prettier
+- `yarn check-format` - Check code formatting
+
+### Pre-commit Hooks
+
+The project uses Husky to run the following checks before each commit:
+
+- Code formatting check
+- Linting
+- Type checking
+- Build verification
+
+## How to Use
+
+1. Open the application in your web browser
+2. Click the "Upload" button to select a text file
+3. Once a file is selected, click "Process and download"
+4. The compressed file will be automatically downloaded as `compressed.json`
+
+## Project Structure
+
+```
+compress/
+├── src/
+│   ├── components/      # React components
+│   ├── helpers/         # Utility functions
+│   ├── styles/         # CSS styles
+│   ├── App.tsx         # Main application component
+│   └── main.tsx        # Application entry point
+├── public/             # Static assets
+└── package.json        # Project dependencies and scripts
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
