@@ -1,4 +1,10 @@
 import { useState } from 'react';
+
+// Components
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
+
+// Styles
 import './App.css';
 
 function App() {
@@ -6,9 +12,7 @@ function App() {
 
   return (
     <>
-      <header>
-        <h1>De/Compress</h1>
-      </header>
+      <Header />
 
       <main>
         <div className="wrapper">
@@ -29,18 +33,7 @@ function App() {
         </div>
       </main>
 
-      <footer>
-        <p>
-          Made with{' '}
-          <a href="https://vitejs.dev/">
-            <code>vite</code>
-          </a>{' '}
-          and{' '}
-          <a href="https://reactjs.org/">
-            <code>react</code>
-          </a>
-        </p>
-      </footer>
+      <Footer />
     </>
   );
 }

@@ -8,6 +8,14 @@
   margin: 0 auto;
 }
 
+main {
+  display: flex;
+  place-items: center;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1 1 100%;
+}
+
 .wrapper {
   flex-grow: 1;
   display: flex;
